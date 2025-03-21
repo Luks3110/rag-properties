@@ -1,0 +1,32 @@
+{
+    "name": "rag-properties",
+    "version": "1.0.0",
+    "description": "RAG system for property data using MongoDB Atlas Vector Search",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node src/index.ts",
+        "import-data": "node scripts/import-properties.js",
+        "generate-embeddings": "node scripts/generate-embeddings.js",
+        "setup-index": "node scripts/setup-vector-index.js",
+        "setup-all": "pnpm import-data && pnpm generate-embeddings && pnpm setup-index"
+    },
+    "dependencies": {
+        "@langchain/core": "latest",
+        "@langchain/community": "latest",
+        "@langchain/google-genai": "latest",
+        "@langchain/mongodb": "latest",
+        "langchain": "latest",
+        "mongodb": "latest",
+        "@langchain/openai": "latest",
+        "@google/generative-ai": "latest",
+        "@langchain/langgraph": "latest",
+        "dotenv": "latest"
+    },
+    "devDependencies": {
+        "@types/node": "latest",
+        "ts-node": "latest",
+        "typescript": "latest"
+    }
+}

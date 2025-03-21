@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mongodb-atlas:
+    image: mongodb/mongodb-atlas-local:latest
+    container_name: mongodb-atlas-local
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=admin
+      - MONGODB_INITDB_ROOT_PASSWORD=password
+      - MONGODB_DATABASE=pilar
+      - ATLAS_DISABLE_SECURITY=true
+      - ATLAS_DISABLE_AUTHENTICATION=true
+      - ATLAS_REPLICA_SET=rs0
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongodb_keyfile:/data/configdb
+    command: mongod --replSet rs0 --bind_ip_all
+    restart: unless-stopped
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  rag-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-service
+    depends_on:
+      mongodb-atlas:
+        condition: service_healthy
+    environment:
+      - MONGODB_URI=mongodb://mongodb-atlas:27017
+      - MONGODB_DATABASE=pilar
+      - MONGODB_COLLECTION=properties_embeddings
+      - MONGODB_VECTOR_INDEX=vector_index
+      - GOOGLE_API_KEY=
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    command: pnpm dev
+    restart: unless-stopped
+
+networks:
+  rag-network:
+    driver: bridge
+    name: rag-network
+
+volumes:
+  mongodb_data:
+    driver: local 
